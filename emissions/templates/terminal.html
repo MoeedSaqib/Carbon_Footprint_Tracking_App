@@ -1,0 +1,250 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green Steps Terminal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: url("{% static 'DB1.png' %}") no-repeat center center fixed;
+      background-size: cover;
+      backdrop-filter: blur(5px);
+      color: #fff;
+    }
+
+    .toggle-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+      color: #9be298;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .dashboard {
+      display: flex;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .sidebar {
+      width: 240px;
+      min-width: 240px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar.collapsed {
+      width: 70px;
+      min-width: 70px;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      font-size: 24px;
+      color: #9be298;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar.collapsed h2,
+    .sidebar.collapsed .label {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+
+    .sidebar a {
+      text-decoration: none;
+      color: #ccc;
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar a:hover {
+      color: #9be298;
+    }
+
+    .icon {
+      font-size: 18px;
+      width: 30px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .label {
+      white-space: nowrap;
+      opacity: 1;
+      transform: translateX(0);
+      transition: all 0.3s ease;
+    }
+
+    .main-content {
+      flex-grow: 1;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .charts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: space-around;
+      align-items: flex-start;
+    }
+
+    canvas {
+      width: 100%;
+      max-width: 350px;
+      height: 250px !important;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="toggle-btn" onclick="toggleSidebar()">☰</div>
+
+  <div class="dashboard">
+    <div class="sidebar" id="sidebar">
+      <div>
+        <h2>🌱 Green Steps</h2>
+        <a href="{% url 'dashboard' %}"><span class="icon">🏠</span><span class="label">Home</span></a>
+        <a href="{% url 'calculate_emissions' %}"><span class="icon">📢</span><span class="label">Calculate</span></a>
+        <a href="{% url 'eco_page' %}"><span class="icon">📊</span><span class="label">Eco-Friendly Activity</span></a>
+        <a href="{% url 'csr_page' %}"><span class="icon">⚙️</span><span class="label">CSR</span></a>
+        <a href="#"><span class="icon">🚪</span><span class="label">Logout</span></a>
+      </div>
+      <div class="back-btn">
+        <a href="#"><span class="icon">🔙</span><span class="label">Back</span></a>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <h1>Welcome {{ data.username }}</h1>
+
+      <!-- Cards displaying the statistics -->
+      <div class="cards">
+        <div class="card"><h3>CO₂ Saved</h3><p>{{ data.travel|default:0|add:data.energy|add:data.food|add:data.waste }} kg</p></div>
+        <div class="card"><h3>Trees Planted</h3><p>{{ data.trees_planted|default:0 }}</p></div>
+        <div class="card"><h3>Green Missions</h3><p>{{ data.green_missions_active|default:"0" }} Active</p></div>
+
+        <div class="card"><h3>Energy Saved</h3><p>{{ data.energy|default:0 }} kWh</p></div>
+      </div>
+
+      <!-- Section for Graphs -->
+      <div class="charts">
+        <canvas id="barChart" width="350" height="250"></canvas>
+        <canvas id="pieChart" width="350" height="250"></canvas>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Toggle sidebar visibility
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+  }
+
+  // Fetching canvas contexts for the bar and pie charts
+  const barCtx = document.getElementById('barChart').getContext('2d');
+  const pieCtx = document.getElementById('pieChart').getContext('2d');
+
+  // Labels for the charts (Travel, Energy, Food, Waste)
+  const labels = ['Travel', 'Energy', 'Food', 'Waste'];
+
+  // Declare variables once and inject values from Django template
+  const travel = {{ data.travel|default:0 }};
+  const energy = {{ data.energy|default:0 }};
+  const food = {{ data.food|default:0 }};
+  const waste = {{ data.waste|default:0 }};
+
+  // Safely handle data and ensure default values (in case of None or empty values)
+  const values = [
+    isNaN(travel) ? 0 : travel,  // If 'travel' is NaN, default to 0
+    isNaN(energy) ? 0 : energy,  // If 'energy' is NaN, default to 0
+    isNaN(food) ? 0 : food,      // If 'food' is NaN, default to 0
+    isNaN(waste) ? 0 : waste     // If 'waste' is NaN, default to 0
+  ];
+
+  // Bar chart
+  new Chart(barCtx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'CO₂ Saved (kg)',
+        data: values,
+        backgroundColor: '#9be298',
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: '#fff' } }
+      },
+      scales: {
+        x: { ticks: { color: '#ccc' } },
+        y: { ticks: { color: '#ccc' } }
+      }
+    }
+  });
+
+  // Pie chart
+  new Chart(pieCtx, {
+    type: 'pie',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: ['#8ef5b0', '#6ed3f7', '#ffdf6e', '#ffa4a4']
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: '#fff' } }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

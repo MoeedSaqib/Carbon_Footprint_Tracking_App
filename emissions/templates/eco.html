@@ -1,0 +1,233 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Log Eco Action</title>
+  <style>
+    body {
+      background: url("{% static 'DB1.png' %}") no-repeat center center fixed;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 15px 0;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .card:hover, .card.selected {
+      background-color: rgba(0, 255, 153, 0.1);
+      border-color: #00ff99;
+    }
+
+    .slide {
+      display: none;
+    }
+
+    .active {
+      display: block;
+    }
+
+    button {
+      background: #00ff99;
+      color: #000;
+      font-weight: bold;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .slider {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+
+    input, select {
+      padding: 10px;
+      width: 100%;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Slide 1: Category Selection -->
+    <div id="slide1" class="slide active">
+      <h2>Select an Eco-Friendly Activity</h2>
+      <div class="card" onclick="selectCategory('tree')">🌳 Tree Plantation</div>
+      <div class="card" onclick="selectCategory('solar')">☀️ Solar Energy</div>
+      <button onclick="goToSlide(2)" id="nextBtn" disabled>Next</button>
+    </div>
+
+    <!-- Slide 2: Dynamic Form -->
+    <div id="slide2" class="slide">
+      <h2 id="formTitle"></h2>
+      <div id="formContent"></div>
+      <button onclick="logAction()">Log Action</button>
+    </div>
+
+    <!-- Slide 3: Confirmation -->
+    <div id="slide3" class="slide">
+      <h2>✅ Action Logged!</h2>
+      <p>Thanks for taking a green step.</p>
+      <button onclick="goToSlide(1)">Log Another</button>
+    </div>
+
+  </div>
+
+  <script>
+    let selectedCategory = null;
+
+    function selectCategory(category) {
+      selectedCategory = category;
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+      event.target.classList.add('selected');
+      document.getElementById('nextBtn').disabled = false;
+    }
+
+    function goToSlide(slideNum) {
+      document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+      document.getElementById('slide' + slideNum).classList.add('active');
+      if (slideNum === 2) renderForm();
+    }
+
+    function renderForm() {
+      const title = document.getElementById('formTitle');
+      const content = document.getElementById('formContent');
+      content.innerHTML = '';
+
+      if (selectedCategory === 'tree') {
+        title.innerText = 'Tree Plantation';
+        content.innerHTML = `
+          <label>Number of Trees: <span id='treeCount'>1</span></label>
+          <input type="range" min="1" max="50" value="1" class="slider" 
+            oninput="document.getElementById('treeCount').innerText = this.value">
+        `;
+      } else if (selectedCategory === 'solar') {
+        title.innerText = 'Solar Energy';
+        content.innerHTML = `
+          <label>System Size (kW)</label>
+          <input type="number" min="1" max="100" value="5">
+          <label>Days Active</label>
+          <input type="number" min="1" max="365" value="30">
+        `;
+      } else if (selectedCategory === 'travel') {
+        title.innerText = 'Sustainable Travel';
+        content.innerHTML = `
+          <label>Replaced Mode</label>
+          <select><option>Car</option><option>Bike</option><option>Bus</option></select>
+          <label>Distance (km)</label>
+          <input type="number" min="1" max="100" value="10">
+        `;
+      } else if (selectedCategory === 'waste') {
+        title.innerText = 'Waste Management';
+        content.innerHTML = `
+          <label>Type</label>
+          <select><option>Dry</option><option>Wet</option><option>Other</option></select>
+          <label>Weight (kg)</label>
+          <input type="number" min="0.1" step="0.1" value="1">
+        `;
+      }
+    }
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+function logAction() {
+  let data = {};
+
+  if (selectedCategory === 'tree') {
+    const treeCount = document.querySelector('input[type="range"]').value;
+    data = {
+      category: 'tree',
+      number_of_trees: treeCount
+    };
+  } else if (selectedCategory === 'solar') {
+    const inputs = document.querySelectorAll('#formContent input[type="number"]');
+    const systemSize = inputs[0]?.value || 0;
+    const daysActive = inputs[1]?.value || 0;
+    data = {
+      category: 'solar',
+      system_size_kw: systemSize,
+      days_active: daysActive
+    };
+  } else {
+    alert("Please select a valid category.");
+    return;
+  }
+
+  fetch('/log-eco-action/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify(data)
+  })
+  .then(response => {
+  if (!response.ok) {
+    response.json().then(data => {
+      console.error('Server error:', data);
+      alert('Failed to log action: ' + (data.error || 'unknown error'));
+    });
+  } else {
+    goToSlide(3);
+  }
+})
+  .catch(error => {
+  console.error('Error:', error);
+  alert('An error occurred while logging action.');
+  });
+
+
+}
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Green Steps – CSR</title>
+  <style>
+    body {
+      background: url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+      transition: background 0.5s, color 0.5s;
+    }
+
+    .overlay {
+      background: rgba(15, 23, 42, 0.85);
+      padding: 40px;
+      min-height: 100vh;
+    }
+
+    .light-mode .overlay {
+      background: rgba(255, 255, 255, 0.95);
+      color: #1e293b;
+    }
+
+    h1, h2 {
+      text-align: center;
+      font-weight: bold;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-top: 40px;
+    }
+
+    p {
+      text-align: center;
+      font-size: 16px;
+      color: #cbd5e1;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .light-mode p {
+      color: #333;
+    }
+
+    .metrics {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 30px 0;
+    }
+
+    .metric-box {
+      background-color: #1e293b;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      min-width: 200px;
+      flex: 1;
+    }
+
+    .light-mode .metric-box {
+      background-color: #cbd5e1;
+      color: #1e293b;
+    }
+
+    .metric-box h3 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .initiatives ul {
+      list-style: none;
+      padding: 0;
+      font-size: 20px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 2;
+    }
+
+    .csr-pillars {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .csr-pillars div {
+      flex: 1;
+      min-width: 220px;
+      background-color: #1e293b;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .light-mode .csr-pillars div {
+      background-color: #e2e8f0;
+      color: #1e293b;
+    }
+
+    blockquote {
+      text-align: center;
+      font-style: italic;
+      color: #94a3b8;
+      max-width: 700px;
+      margin: 30px auto;
+    }
+
+    .cta {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .cta a {
+      background-color: #10b981;
+      color: white;
+      padding: 10px 30px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 16px;
+      margin: 10px;
+      display: inline-block;
+    }
+
+    .cta a:hover {
+      background-color: #059669;
+    }
+
+    .toggle-mode {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 8px 12px;
+      background-color: #334155;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .light-mode .toggle-mode {
+      background-color: #1e293b;
+      color: #f9f9f9;
+    }
+
+    #topBtn {
+      display: none;
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .credit-info {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: #1e293b;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    form input, form select, form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    form button {
+      background-color: #10b981;
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    form button:hover {
+      background-color: #059669;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Credits Display -->
+  <div class="credit-info">
+    🪙 Your Credits: <strong>320</strong>
+  </div>
+
+  <!-- Theme Toggle -->
+  <button class="toggle-mode" onclick="toggleMode()">Toggle Theme</button>
+
+  <div class="overlay">
+    <h1>Our CSR Commitment</h1>
+    <p>
+      At Green Steps, we believe in making the planet greener and communities stronger.
+    </p>
+
+    <!-- Metrics -->
+    <div class="metrics">
+      <div class="metric-box">
+        <h3 class="counter" data-target="12000">0</h3>
+        <p>CO₂ Saved (kg)</p>
+      </div>
+      <div class="metric-box">
+        <h3 class="counter" data-target="450">0</h3>
+        <p>Trees Planted</p>
+      </div>
+      <div class="metric-box">
+        <h3 class="counter" data-target="25">0</h3>
+        <p>Community Partners</p>
+      </div>
+    </div>
+
+    <!-- CSR Info -->
+    <h2>What is Corporate Social Responsibility?</h2>
+    <p>
+      Corporate Social Responsibility (CSR) is a business model where companies integrate social and environmental concerns
+      into their operations. It’s about making a positive impact while doing business — ethically, sustainably, and responsibly.
+    </p>
+
+    <!-- CSR Pillars -->
+    <h2>Our CSR Principles</h2>
+    <div class="csr-pillars">
+      <div><strong>🧭 Ethics & Transparency</strong><br>Fair, honest, and transparent operations.</div>
+      <div><strong>🌿 Sustainability</strong><br>Reducing emissions and supporting eco-lifestyles.</div>
+      <div><strong>🤝 Stakeholder Engagement</strong><br>Collaboration with users, teams, and communities.</div>
+      <div><strong>⚖ Legal Compliance</strong><br>Aligned with local and international CSR norms.</div>
+      <div><strong>🌟 Brand Trust</strong><br>We earn trust through purpose-driven work.</div>
+    </div>
+
+    <!-- Initiatives -->
+    <h2>Our Initiatives</h2>
+    <div class="initiatives">
+      <ul>
+        <li>🌱 Tree Plantation Drives</li>
+        <li>♻ Recycling Campaigns</li>
+        <li>🚲 Eco-Transport Promotions</li>
+        <li>📚 Environmental Awareness Workshops</li>
+        <li>🌾 Sustainable Farming Support</li>
+      </ul>
+    </div>
+
+    <!-- Testimonial -->
+    <h2>Impact in Action</h2>
+    <blockquote>
+      "Thanks to Green Steps, our campus reduced over 2 tons of CO₂ and planted 75 trees in just 3 months."
+      <br />— University of EcoTech, Partner Organization
+    </blockquote>
+
+    <!-- CTA Buttons -->
+    <div class="cta">
+      <a href="/calculate/">Join Our Mission</a>
+      <a href="/contact/">Partner with Us</a>
+      <a href="/static/reports/GreenSteps_CSR_Report.pdf" download>Download CSR Report</a>
+    </div>
+
+    <!-- CSR Credit Trade Request Form -->
+    <h2 style="margin-top: 60px;">Request CSR Credit Trade</h2>
+    <p>
+      Have credits to offer or looking to acquire more? Send us your request — we’ll respond shortly.
+    </p>
+
+    <form action="/csr-request/" method="POST" style="max-width: 600px; margin: 30px auto; background-color: #1e293b; padding: 25px; border-radius: 12px;">
+      {% csrf_token %}
+      <label for="action">I want to:</label>
+      <select id="action" name="action" required>
+        <option value="">-- Select --</option>
+        <option value="buy">Buy CSR Credits</option>
+        <option value="sell">Sell CSR Credits</option>
+      </select>
+
+      <label for="credits">Number of Credits:</label>
+      <input type="number" id="credits" name="credits" min="1" required />
+
+      <label for="message">Message (optional):</label>
+      <textarea id="message" name="message" rows="4"></textarea>
+
+      <button type="submit">Submit Request</button>
+    </form>
+  </div>
+
+  <!-- Back to Top -->
+  <button onclick="scrollToTop()" id="topBtn" title="Go to top">↑</button>
+
+  <!-- JavaScript -->
+  <script>
+    // Counter Animation
+    const counters = document.querySelectorAll('.counter');
+    counters.forEach(counter => {
+      counter.innerText = '0';
+      const update = () => {
+        const target = +counter.getAttribute('data-target');
+        const current = +counter.innerText;
+        const increment = target / 100;
+        if (current < target) {
+          counter.innerText = Math.ceil(current + increment);
+          setTimeout(update, 10);
+        } else {
+          counter.innerText = target.toLocaleString();
+        }
+      };
+      update();
+    });
+
+    // Light/Dark Mode
+    function toggleMode() {
+      document.body.classList.toggle('light-mode');
+    }
+
+    // Scroll to Top
+    const topBtn = document.getElementById("topBtn");
+    window.onscroll = function () {
+      topBtn.style.display = (document.documentElement.scrollTop > 300) ? "block" : "none";
+    };
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+
+</body>
+</html>

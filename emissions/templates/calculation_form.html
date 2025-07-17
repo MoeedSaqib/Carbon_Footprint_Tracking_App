@@ -1,0 +1,558 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green Steps - Log Action</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    body {
+      background: url("{% static 'DB1.png' %}") no-repeat center center fixed;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #111;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .log-section {
+      width: 100%;
+      max-width: 600px;
+      background-color: #1c1c1e;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0, 255, 128, 0.2);
+    }
+
+    h2, p {
+      text-align: center;
+    }
+
+    .category-selection {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .category-btn {
+      background-color: #2b2b2d;
+      color: white;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .category-btn:hover {
+      background-color: #49b8bf;
+    }
+
+    .category-btn img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+    }
+
+    .tabs, .sub-tab {
+      display: none;
+    }
+
+    .tabs.active, .sub-tab.active {
+      display: block;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .tabs button {
+      background-color: #2b2b2d;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .tabs button.active, .tabs button:hover {
+      background-color: #49b8bf;
+    }
+
+    .appliance-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .appliance-card {
+      background-color: #1c1c1e;
+      padding: 12px;
+      border-radius: 12px;
+      width: 100px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,255,128,0.15);
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .appliance-card:hover {
+      transform: scale(1.05);
+      border: 2px solid #4fd1c5;
+    }
+
+    .appliance-card.selected {
+      border: 2px solid #4fd1c5;
+    }
+
+    .appliance-card img {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    form input, form select, form button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      font-size: 1rem;
+      border: none;
+    }
+
+    .log-btn {
+      background-color: #49b8bf;
+      color: white;
+      font-weight: bold;
+    }
+
+    .log-btn:hover {
+      background-color: #3a9c9c;
+    }
+
+.message-container {
+  margin-top: 20px;
+}
+
+/* Style for Success and Error Messages */
+.message {
+  padding: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.success {
+  background-color: #d4edda;
+  color: #155724;  /* Green text */
+}
+
+.error {
+  background-color: #f8d7da;
+  color: #721c24;  /* Red text */
+}
+
+
+</style>
+</head>
+<body>
+  <div class="log-section">
+    <h2>You saved <span id="co2-value">this much</span> kg CO₂eq</h2>
+    <p>by sustainable choices
+    </p>
+
+    <!-- CATEGORY SELECTION -->
+<div id="category-screen" class="category-selection">
+      <button class="category-btn" onclick="startLogging('travel')">
+        <img src="{% static 'travel.png' %}" alt="Travel"> Travelled Responsibly
+      </button>
+      <button class="category-btn" onclick="startLogging('energy')">
+        <img src="{% static 'energy.png' %}" alt="Energy"> Saved Energy
+      </button>
+      <button class="category-btn" onclick="startLogging('food')">
+        <img src="{% static 'ate.png' %}" alt="ate"> Ate Sustainably
+      </button>
+      <button class="category-btn" onclick="startLogging('waste')">
+        <img src="{% static 'waste.png' %}" alt="Waste"> Managed Waste
+      </button>
+    </div>
+
+
+{% if messages %}
+  <div class="message-container">
+    {% for message in messages %}
+      <div class="message {% if message.tags == 'success' %}success{% else %}error{% endif %}" style="text-align: center; font-size: 1.2em; margin-bottom: 20px;">
+        <p>{{ message }}</p>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+
+<div id="travel-form" style="display:none;">
+  <form method="POST" action="{% url 'log_action' %}">
+    {% csrf_token %}
+    <input type="hidden" name="category" value="travel">
+    
+    <div class="appliance-row">
+      <div class="appliance-card" onclick="selectTravelMode('car', this, 'modeUsed')">
+        <img src="{% static 'car.jpeg' %}" alt="Car">
+        <p>Car</p>
+      </div>
+      <div class="appliance-card" onclick="selectTravelMode('bus', this, 'modeUsed')">
+        <img src="{% static 'bus.jpeg' %}" alt="Bus">
+        <p>Bus</p>
+      </div>
+      <div class="appliance-card" onclick="selectTravelMode('train', this, 'modeUsed')">
+        <img src="{% static 'train.jpeg' %}" alt="Train">
+        <p>Train</p>
+      </div>
+      <div class="appliance-card" onclick="selectTravelMode('electric_car', this, 'modeUsed')">
+        <img src="{% static 'ecar.jpeg' %}" alt="Electric Car">
+        <p>Electric Car</p>
+      </div>
+      <div class="appliance-card" onclick="selectTravelMode('bicycle', this, 'modeUsed')">
+        <img src="{% static 'bicycle.jpeg' %}" alt="Bicycle">
+        <p>Bicycle</p>
+      </div>
+      <div class="appliance-card" onclick="selectTravelMode('flight', this, 'modeUsed')">
+        <img src="{% static 'flight.jpeg' %}" alt="Flight">
+        <p>Flight</p>
+      </div>
+      <div class="appliance-card" onclick="selectTravelMode('ebike', this, 'modeUsed')">
+        <img src="{% static 'ebike.jpeg' %}" alt="E-Bike">
+        <p>E-Bike</p>
+      </div>
+      <div class="appliance-card" onclick="selectTravelMode('motorbike', this, 'modeUsed')">
+        <img src="{% static 'bike.jpeg' %}" alt="Motorbike">
+        <p>Motorbike</p>
+      </div>
+    </div>
+    
+    <input type="hidden" id="modeUsed" name="modeUsed" value="">
+    
+    <label for="modeReplaced">Replaced Mode</label>
+    <select id="modeReplaced" name="modeReplaced" required>
+      <option value="car">Car</option>
+      <option value="bus">Bus</option>
+      <option value="train">Train</option>
+      <option value="electric_car">Electric Car</option>
+      <option value="bicycle">Bicycle</option>
+      <option value="flight">Flight</option>
+      <option value="ebike">E-Bike</option>
+      <option value="motorbike">Motorbike</option>
+    </select>
+    
+    <label for="distance">Distance Travelled (km)</label>
+    <input type="number" id="distance" name="distance" min="0" step="0.1" required>
+    
+    <button type="submit" class="log-btn">Log Travel</button>
+  </form>
+</div>
+
+<!-- ENERGY / OTHER FORMS -->
+<!-- ENERGY / OTHER FORMS -->
+<div id="log-forms" style="display:none;">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('hvac')">HVAC</button>
+    <button class="tab-btn" onclick="showTab('lighting')">Lighting</button>
+    <button class="tab-btn" onclick="showTab('appliances')">Appliances</button>
+  </div>
+
+  <!-- HVAC Section -->
+  <div id="hvac" class="sub-tab active">
+    <form method="POST" action="{% url 'log_action' %}">
+      {% csrf_token %}
+      <input type="hidden" name="category" value="energy">
+      <input type="hidden" name="appliance" id="selectedAppliance"> <!-- Hidden input for HVAC appliance selection -->
+
+      <div class="appliance-row">
+        <div class="appliance-card" onclick="selectCard('ac', this)">
+          <img src="{% static 'ac.png' %}" alt="AC">
+          <p>AC</p>
+        </div>
+        <div class="appliance-card" onclick="selectCard('fan', this)">
+          <img src="{% static 'fan.png' %}" alt="Fan">
+          <p>Fan</p>
+        </div>
+        <div class="appliance-card" onclick="selectCard('heater', this)">
+          <img src="{% static 'heater.png' %}" alt="Heater">
+          <p>Heater</p>
+        </div>
+      </div>
+
+      <label>Duration (hours)</label>
+      <input type="number" name="duration" min="1" required>
+
+      <!-- Temperature input only for AC if selected -->
+      <div id="temperature-section" style="display:none;">
+        <label>Temperature Increase (°C)</label>
+        <input type="number" name="temp_change" min="1" placeholder="Enter temperature change">
+      </div>
+
+      <button type="submit" class="log-btn">Log Action</button>
+    </form>
+  </div>
+
+  <!-- Lighting Section -->
+  <div id="lighting" class="sub-tab">
+    <form method="POST" action="{% url 'log_action' %}">
+      {% csrf_token %}
+      <input type="hidden" name="category" value="energy">
+      <input type="hidden" name="appliance" value="lighting"> <!-- Static input for lighting -->
+
+      <div class="appliance-row">
+        <div class="appliance-card selected">
+          <img src="{% static 'lighting.png' %}" alt="Lighting">
+          <p>Lighting</p>
+        </div>
+      </div>
+
+      <label>Action Taken</label>
+      <select name="action" required>
+        <option value="switched_off">Switched off lights</option>
+        <option value="used_led">Used LED lights</option>
+      </select>
+
+      <label>Duration (hours)</label>
+      <input type="number" name="duration" required>
+
+      <button type="submit" class="log-btn">Log Action</button>
+    </form>
+  </div>
+
+  <!-- Appliances Section -->
+  <div id="appliances" class="sub-tab">
+    <form method="POST" action="{% url 'log_action' %}">
+      {% csrf_token %}
+      <input type="hidden" name="category" value="energy">
+      <input type="hidden" name="appliance" id="selectedApplianceAppl"> <!-- Hidden input for appliance selection -->
+
+      <div class="appliance-row">
+        <div class="appliance-card" onclick="selectCard('water_heater', this, 'Appl')">
+          <img src="{% static 'water_heater.png' %}" alt="Water Heater">
+          <p>Water Heater</p>
+        </div>
+        <div class="appliance-card" onclick="selectCard('refrigerator', this, 'Appl')">
+          <img src="{% static 'refrigerator.png' %}" alt="Refrigerator">
+          <p>Refrigerator</p>
+        </div>
+        <div class="appliance-card" onclick="selectCard('laundry', this, 'Appl')">
+          <img src="{% static 'laundry.png' %}" alt="Laundry">
+          <p>Laundry</p>
+        </div>
+        <div class="appliance-card" onclick="selectCard('dishwasher', this, 'Appl')">
+          <img src="{% static 'dishwasher.png' %}" alt="Dishwasher">
+          <p>Dishwasher</p>
+        </div>
+      </div>
+
+      <label>Action Taken</label>
+      <select name="action" required>
+        <option value="used_less">Used less hot water</option>
+        <option value="energy_efficient">Used energy-efficient setting</option>
+      </select>
+
+      <label>Quantity of Water (litres)</label>
+      <input type="number" name="duration" min="1" required>
+
+      <button type="submit" class="log-btn">Log Action</button>
+    </form>
+  </div>
+</div>
+
+
+<!-- MANAGED WASTE FORM -->
+<div id="waste-form" style="display:none;">
+  <form method="POST" action="{% url 'log_action' %}">
+    {% csrf_token %}
+    <input type="hidden" name="category" value="waste">
+    <input type="hidden" name="waste_type" id="selectedWasteType" value="wet">
+    <input type="hidden" name="waste_item" id="selectedWasteItem">
+    <input type="hidden" name="weight" id="wasteWeight" value="1">
+
+    <div class="tabs">
+      <button type="button" class="tab-btn active" onclick="showWasteTab('wet')">Wet Waste</button>
+      <button type="button" class="tab-btn" onclick="showWasteTab('dry')">Dry Waste</button>
+      <button type="button" class="tab-btn" onclick="showWasteTab('other')">Other Waste</button>
+    </div>
+
+    <!-- Wet Waste Tab -->
+    <div class="sub-tab waste-tab active" id="waste-tab-wet">
+      <div class="appliance-row">
+        <div class="appliance-card" onclick="selectWaste('wet', 'wet_waste', this)">
+          <img src="{% static 'wet.png' %}" alt="Wet"><p>Wet Waste</p>
+        </div>
+      </div>
+      <select name="action" required>
+        <option value="composted">Composted</option>
+        <option value="fed_animals">Fed to Animals</option>
+      </select>
+    </div>
+
+    <!-- Dry Waste Tab -->
+    <div class="sub-tab waste-tab" id="waste-tab-dry">
+      <div class="appliance-row">
+        <div class="appliance-card" onclick="selectWaste('dry', 'plastic', this)">
+          <img src="{% static 'plastic.jpeg' %}" alt="Plastic"><p>Plastic</p>
+        </div>
+        <div class="appliance-card" onclick="selectWaste('dry', 'paper_qty', this)">
+          <img src="{% static 'paper_qty.jpeg' %}" alt="Paper Qty"><p>Paper (Qty)</p>
+        </div>
+        <div class="appliance-card" onclick="selectWaste('dry', 'paper_weight', this)">
+          <img src="{% static 'paper_wt.png' %}" alt="Paper Wt"><p>Paper (Wt)</p>
+        </div>
+      </div>
+      <select name="action" required>
+        <option value="reused">Reused</option>
+        <option value="refused">Refused</option>
+      </select>
+    </div>
+
+    <!-- Other Waste Tab -->
+    <div class="sub-tab waste-tab" id="waste-tab-other">
+      <div class="appliance-row">
+        <div class="appliance-card" onclick="selectWaste('other', 'furniture', this)">
+          <img src="{% static 'furniture.png' %}" alt="Furniture"><p>Furniture</p>
+        </div>
+        <div class="appliance-card" onclick="selectWaste('other', 'clothes', this)">
+          <img src="{% static 'clothes.png' %}" alt="Clothes"><p>Clothes</p>
+        </div>
+        <div class="appliance-card" onclick="selectWaste('other', 'footwear', this)">
+          <img src="{% static 'footwear.png' %}" alt="Footwear"><p>Footwear</p>
+        </div>
+        <div class="appliance-card" onclick="selectWaste('other', 'electronics', this)">
+          <img src="{% static 'electronics.png' %}" alt="Electronics"><p>Electronics</p>
+        </div>
+      </div>
+      <select name="action" required>
+        <option value="donated">Donated</option>
+        <option value="refurbished">Refurbished</option>
+        <option value="sold">Sold</option>
+      </select>
+    </div>
+
+    <label>Weight</label>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <input type="range" min="0.1" max="50" step="0.1" value="1" oninput="updateWasteWeight(this.value)">
+      <span id="waste-weight-display">1 kg</span>
+    </div>
+
+    <div class="optional-box">Provide Optional Details ▼</div>
+    <button type="submit" class="log-btn">Log Action</button>
+  </form>
+</div>
+
+  </div>
+
+<script>
+  function startLogging(category) {
+    document.getElementById('category-screen').style.display = 'none';
+
+    // Hide all forms first
+    document.getElementById('log-forms').style.display = 'none';
+    document.getElementById('travel-form').style.display = 'none';
+    document.getElementById('food-form').style.display = 'none';
+
+    if (category === 'travel') {
+      document.getElementById('travel-form').style.display = 'block';
+    } else if (category === 'energy') {
+      document.getElementById('log-forms').style.display = 'block';
+      document.querySelectorAll('.tab-btn')[0].click(); // default to first tab
+    } else if (category === 'food') {
+      document.getElementById('food-form').style.display = 'block';
+    }
+  }
+
+  function showTab(id) {
+    document.querySelectorAll('.sub-tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+function selectCard(name, element, suffix = '') {
+  // Get the corresponding hidden input field to store the selected appliance
+  const inputId = `selected${suffix}`;
+  const containerId = suffix === 'Appl' ? 'appliances' : suffix === 'Food' ? 'food-form' : 'hvac';
+  
+  // Set the value of the hidden input to the selected appliance
+  document.getElementById(inputId).value = name;
+
+  // Remove 'selected' class from all cards in the section
+  document.querySelectorAll(`#${containerId} .appliance-card`).forEach(card => card.classList.remove('selected'));
+
+  // Add the 'selected' class to the clicked card
+  element.classList.add('selected');
+}
+
+
+  function selectTravelMode(mode, element, inputId) {
+    document.getElementById(inputId).value = mode;
+    const container = element.parentElement;
+    container.querySelectorAll('.appliance-card').forEach(card => card.classList.remove('selected'));
+    element.classList.add('selected');
+  }
+
+  function updateWeight(val) {
+    document.getElementById('weight-display').innerText = parseFloat(val).toFixed(1) + ' kg';
+    document.getElementById('foodWeight').value = val;
+  }
+
+  function showWasteTab(type) {
+    document.getElementById('selectedWasteType').value = type;
+    document.querySelectorAll('.waste-tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`waste-tab-${type}`).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function selectWaste(type, item, element) {
+    document.getElementById('selectedWasteItem').value = item;
+    const parent = element.parentElement;
+    parent.querySelectorAll('.appliance-card').forEach(card => card.classList.remove('selected'));
+    element.classList.add('selected');
+  }
+
+  function updateWasteWeight(val) {
+    document.getElementById('wasteWeight').value = val;
+    document.getElementById('waste-weight-display').innerText = parseFloat(val).toFixed(1) + " kg";
+  }
+
+  function startLogging(category) {
+    document.getElementById('category-screen').style.display = 'none';
+    if (category === 'travel') {
+      document.getElementById('travel-form').style.display = 'block';
+    } else if (category === 'food') {
+      document.getElementById('food-form').style.display = 'block';
+    } else if (category === 'waste') {
+      document.getElementById('waste-form').style.display = 'block';
+    } else {
+      document.getElementById('log-forms').style.display = 'block';
+      document.querySelectorAll('.tab-btn')[0].click();
+    }
+  }
+</script>
+
+</body>
+</html>

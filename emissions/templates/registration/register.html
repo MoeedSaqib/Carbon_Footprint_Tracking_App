@@ -1,0 +1,215 @@
+{% load widget_tweaks %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register - Green Steps</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+  <style>
+    body {
+      background: url("{% static 'DB1.png'%}") no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .glass-register {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 400px;
+      color: white;
+    }
+
+    .glass-register h2 {
+      text-align: center;
+      font-weight: bold;
+      color: #f0fff0;
+      margin-bottom: 30px;
+    }
+
+    .form-control {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 50px;
+      padding-left: 20px;
+      color: white;
+      margin-bottom: 15px;
+    }
+
+    .form-control::placeholder {
+      color: #cfcfcf;
+    }
+
+    .btn-green {
+      background-color: #1e5631;
+      border: none;
+      width: 100%;
+      padding: 10px;
+      font-weight: bold;
+      color: white;
+      border-radius: 50px;
+    }
+
+    .btn-green:hover {
+      background-color: #14532d;
+    }
+  </style>
+</head>
+<script>
+  function togglePassword(id, iconId) {
+    const input = document.getElementById(id);
+    const icon = document.getElementById(iconId);
+    if (input.type === "password") {
+      input.type = "text";
+      icon.classList.remove("bi-eye");
+      icon.classList.add("bi-eye-slash");
+    } else {
+      input.type = "password";
+      icon.classList.remove("bi-eye-slash");
+      icon.classList.add("bi-eye");
+    }
+  }
+</script>
+ <style>
+    body {
+      background: url("{% static 'DB1.png' %}") no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .glass-register {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 600px;
+      color: white;
+    }
+
+    .glass-register h2 {
+      text-align: center;
+      font-weight: bold;
+      color: #f0fff0;
+      margin-bottom: 30px;
+    }
+
+    form p {
+      margin-bottom: 20px;
+    }
+
+    form label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 400;
+      color: #e0ffe0;
+    }
+
+    form input {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 50px;
+      padding: 10px 20px;
+      width: 100%;
+      color: white;
+      font-size: 1rem;
+    }
+
+    form input::placeholder {
+      color: #cfcfcf;
+    }
+
+    .text-danger {
+      color: #ff6b6b !important;
+      font-size: 0.875rem;
+      margin-top: 5px;
+      font-weight: 600;
+    }
+
+    button.btn-green {
+      background-color: #1e5631;
+      border: none;
+      width: 100%;
+      padding: 10px;
+      font-weight: bold;
+      color: white;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button.btn-green:hover {
+      background-color: #14532d;
+    }
+    /* Style validation error messages under inputs */
+.errorlist {
+  font-size: 0.70rem;      /* smaller font size */
+  color: #ff6b6b;         /* match error color */
+  margin-top: 5px;
+  margin-bottom: 10px;
+  padding-left: 20px;     /* indent bullet points */
+}
+id_password1 + ul.errorlist {
+  display: none !important;
+}
+form ul {
+  display: none !important;
+}
+
+
+
+/* Style help text if any (you can adjust selector) */
+.helptext {
+  font-size: 0.70rem;
+  color: #cfcfcf;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+  </style>
+</head>
+<body>
+  <div class="glass-register">
+    <h2>Create Account 🌱</h2>
+
+    {% if form.errors %}
+      <div style="color: #ff6b6b; font-weight: bold; margin-bottom: 10px;">
+        Please correct the errors below.
+      </div>
+    {% endif %}
+
+    <form method="post" autocomplete="off">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn-green">Register</button>
+    </form>
+
+<script>
+  window.onload = function() {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => form.reset());  // Clears all input fields
+
+    // Optional: clear error message containers
+    document.querySelectorAll('.alert, .text-danger').forEach(el => el.innerHTML = '');
+  };
+</script>
+
+</script>
+
+</body>
+</html>
